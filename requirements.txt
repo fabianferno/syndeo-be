@@ -1,0 +1,4 @@
+﻿Flask==1.1.2
+Flask-MySQL==1.5.2
+Flask-RESTful==0.3.8
+PyMySQL==1.0.2
