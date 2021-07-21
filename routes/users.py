@@ -11,7 +11,7 @@ def manageUsers():
         [GET] - Get a profile under the given uid
     """
     try:
-        _uid = request.form['uid']
+
         # if _uid and request.method == 'POST':
         #     # Create a new user
 
@@ -33,7 +33,9 @@ def manageUsers():
         #     res.status_code = 200
         #     return res
 
-        if _uid and request.method == 'GET':
+        if request.method == 'GET':
+            _uid = request.args['uid']
+
             conn = mysql.connect()
             cursor = conn.cursor()
 
@@ -41,6 +43,9 @@ def manageUsers():
                 f"SELECT * FROM `users` WHERE `users`.`uid` = '{_uid}'")
 
             profile = cursor.fetchone()
+
+            cursor.close()
+            conn.close()
 
             res = jsonify(profile)
             res.status_code = 200
@@ -52,7 +57,3 @@ def manageUsers():
     except Exception as e:
         print(e)
         return internal_server_error()
-
-    finally:
-        cursor.close()
-        conn.close()
