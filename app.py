@@ -1,27 +1,27 @@
-from routes import endpoint
-from routes import endpoint_boilerplate
 from flask import Flask, jsonify, request
 
 app = Flask(__name__, static_url_path='', static_folder='.')
 
-# 404 handler
-
 
 @app.errorhandler(404)
 def not_found(error=None):
+    """
+        404 handler
+    """
     message = {
         'status': 404,
-        'message': 'Your requested url could not be found: ' + request.url,
+        'message': 'There is no record: ' + request.url,
     }
     res = jsonify(message)
     res.status_code = 404
     return res
-# 404 handler ends
 
 
-# 403 handler
 @app.errorhandler(403)
 def forbidden(error=None):
+    """
+        403 handler
+    """
     message = {
         'status': 403,
         'message': 'Forbidden',
@@ -29,21 +29,36 @@ def forbidden(error=None):
     res = jsonify(message)
     res.status_code = 403
     return res
-# 403 handler ends
 
-# CORS section
+
+@app.errorhandler(500)
+def internal_server_error(error=None):
+    """
+        500 handler
+    """
+    message = {
+        'status': 500,
+        'message': 'Failed to process request',
+    }
+    res = jsonify(message)
+    res.status_code = 500
+    traceback.print_exc()
+    return res
 
 
 @app.after_request
 def after_request_func(response):
+    """
+        CORS Section
+    """
     response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add('Access-Control-Allow-Headers', "*")
     response.headers.add('Access-Control-Allow-Methods', "*")
     return response
-# end CORS section
 
 
 # Add your API endpoints here
+from routes import users
 
 
 @app.route('/')
