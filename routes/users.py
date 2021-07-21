@@ -1,52 +1,57 @@
 import pymysql
-from app import app, forbidden
+from app import app, forbidden, internal_server_error
 from config import mysql
 from flask import jsonify, request
 
 
-@app.route('users/register', methods=['POST'])
-def registerUser():
+@app.route('/users', methods=['POST', 'GET', 'PUT', 'DELETE'])
+def manageUsers():
+    """
+        [POST] - Create a new profile
+        [GET] - Get a profile under the given uid
+    """
     try:
         _uid = request.form['uid']
-        _name = request.form['name']
+        # if _uid and request.method == 'POST':
+        #     # Create a new user
 
-        if _uid and _name and request.method == 'POST':
-            # insert record in database
-            sqlQuery = f"INSERT INTO users(uid,name) VALUES('{_uid}', '{_name}')"
+        #     _fullName = request.form['fullName']
+        #     _email = request.form['email']
+        #     _gender = request.form['gender']
+        #     _mobile = request.form['mobile']
+        #     _batch = request.form['batch']
+        #     _department = request.form['department']
+        #     _address = request.form['address']
+
+        #     conn = mysql.connect()
+        #     cursor = conn.cursor()
+
+        #     cursor.execute(
+        #         f"INSERT INTO users(uid, fullName, email, gender, mobile, batch, department, address, dateOfBirth, ) VALUES('{_uid}', '{_email}')")
+        #     conn.commit()
+        #     res = jsonify('success')
+        #     res.status_code = 200
+        #     return res
+
+        if _uid and request.method == 'GET':
             conn = mysql.connect()
             cursor = conn.cursor()
-            cursor.execute(sqlQuery)
-            conn.commit()
-            res = jsonify('success')
+
+            cursor.execute(
+                f"SELECT * FROM `users` WHERE `users`.`uid` = '{_uid}'")
+
+            profile = cursor.fetchone()
+
+            res = jsonify(profile)
             res.status_code = 200
             return res
+
         else:
-            return forbidden()
+            return forbidden()  # It throws a 403 response saying "failure"
 
     except Exception as e:
         print(e)
-
-    finally:
-        cursor.close()
-        conn.close()
-
-
-@app.route('users/search', methods=['GET'])
-def searchUser():
-    try:
-        _keywords = request.form['keywords']
-
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        cursor.execute(
-            f"SELECT * FROM `users` WHERE `users`.`name` = '{_keywords}'")
-        rows = cursor.fetchall()
-        res = jsonify(rows)
-        res.status_code = 200
-        return res
-
-    except Exception as e:
-        print(e)
+        return internal_server_error()
 
     finally:
         cursor.close()
