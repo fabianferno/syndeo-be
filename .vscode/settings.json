@@ -1,0 +1,17 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default"
+            },
+            "previewLimit": 50,
+            "server": "opencloud.pattarai.in",
+            "port": 8306,
+            "driver": "MySQL",
+            "name": "Syndeo",
+            "database": "fabian",
+            "username": "tux",
+            "password": "licet@123"
+        }
+    ]
+}
