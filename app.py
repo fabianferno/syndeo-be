@@ -60,7 +60,9 @@ def after_request_func(response):
 
 # Add your API endpoints here
 from routes import users
-
+from routes import mentors
+from routes import mentees
+from routes import admin
 
 @app.route('/')
 def homeRoute():
