@@ -16,7 +16,7 @@ def getMentors():
             conn = mysql.connect()
             cursor = conn.cursor()
 
-            cursor.execute(f"SELECT `mentorUid` FROM `allocations` WHERE `allocations`.`menteeUid` = '{_menteeUid}'")
+            cursor.execute(f"SELECT * FROM `allocations` WHERE `allocations`.`menteeUid` = '{_menteeUid}'")
             mentors = cursor.fetchone()
 
             cursor.close()
