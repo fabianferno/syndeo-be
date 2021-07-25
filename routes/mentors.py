@@ -81,7 +81,7 @@ def isAgreed():
             cursor.execute(f"UPDATE `allocations` SET `allocations`.`isAgreed`=1 WHERE `allocations`.`mentorUid`='{_mentorUid}'")
 
             conn.commit()
-          
+            
             res = jsonify('success')
             res.status_code = 200
             return res

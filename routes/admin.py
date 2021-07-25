@@ -29,7 +29,7 @@ def adminValidate():
                 return forbidden()  # It throws a 403 response saying "failure"
 
             conn.commit()
-          
+            
             res = jsonify('success')
             res.status_code = 200
             return res

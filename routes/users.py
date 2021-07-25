@@ -81,7 +81,7 @@ def manageUsers():
             cursor.execute(f"SELECT * FROM `users` WHERE `users`.`uid` = '{_uid}'")
             
             conn.commit()
-          
+            
             res = jsonify('success')
             res.status_code = 200
             return res
@@ -96,7 +96,7 @@ def manageUsers():
             cursor.execute(f"SELECT * FROM `users` WHERE `users`.`uid` = '{_uid}'")
             
             conn.commit()
-          
+
             res = jsonify('success')
             res.status_code = 200
             return res
