@@ -44,12 +44,13 @@ def allocations():
                                 f"SELECT * FROM `allocations` WHERE `allocations`.`allocationId` = '{_allocationId}'")
                 else:
                     return forbidden()  # It throws a 403 response saying "failure"
-                    allocationRecord = cursor.fetchone()
-                    cursor.close()
-                    conn.close()
-                    res = jsonify(allocationRecord)
-                    res.status_code = 200
-                    return res
+
+                allocationRecord = cursor.fetchone()
+                cursor.close()
+                conn.close()
+                res = jsonify(allocationRecord)
+                res.status_code = 200
+                return res
             else:
                 return forbidden()  # It throws a 403 response saying "failure"
 
@@ -81,12 +82,13 @@ def allocations():
                     
                 else:
                     return forbidden()  # It throws a 403 response saying "failure"
-                    allocationRecord = cursor.fetchone()
-                    cursor.close()
-                    conn.close()
-                    res = jsonify(allocationRecord)
-                    res.status_code = 200
-                    return res
+                    
+                allocationRecord = cursor.fetchone()
+                cursor.close()
+                conn.close()
+                res = jsonify(allocationRecord)
+                res.status_code = 200
+                return res
             
             else:
                 return forbidden()  # It throws a 403 response saying "failure"         
