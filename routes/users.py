@@ -88,17 +88,53 @@ def manageUsers():
         if request.method == 'PUT':
             _uid = request.form['uid']
             
+            
+            _fullName = request.form['fullName']
+            _email = request.form['email']
+            _gender = request.form['gender']
+            _dateOfBirth = request.form['dateOfBirth']
+            _mobile = request.form['mobile']
+            _batch = request.form['batch']
+            _department = request.form['department']
+            
+            _designation = request.form['designation']
+            _linkedinUrl = request.form['linkedInURL']
+            _contactPref = request.form['contactPref']
+            _languages = request.form['languages']
+            _resumeLink = request.form['resumeLink']
+            _areasOfInterest = request.form['areasOfInterest']
+            _higherEd = request.form['higherEd']
+            _licensesAndCerts = request.form['licensesAndCerts']
+            _tags = request.form['tags']
+            _profileURL = request.form['profileURL']
+            _summary = request.form['summary']
+            _country = request.form['country']
+            
 
             conn = mysql.connect()
             cursor = conn.cursor()
-            
-            cursor.execute(f"SELECT * FROM `users` WHERE `users`.`uid` = '{_uid}'")
-            
+
+            cursor.execute(
+            f"UPDATE users SET (uid, fullName, email, designation, gender, dateOfBirth, batch, department, mobile, contactPref, country, linkedInURL, resumeLink, summary, areasOfInterest, languages, higherEd, licensesAndCerts, profileURL ) VALUES('{_uid}','{_fullName}', '{_email}','{_designation}','{_gender}','{_dateOfBirth}','{_batch}','{_department},'{_mobile}','{_contactPref}','{_country}','{_linkedinUrl}','{_resumeLink}','{_summary}','{_areasOfInterest}','{_languages}','{_higherEd}', '{_licensesAndCerts}','{_profileURL}')")
             conn.commit()
-            
+            tags=_tags.split(',')
+            sql = f"INSERT INTO tags (uid, *) VALUES('{_uid}', %)"
+            i = 1
+            for tag in tags:
+                print(tag)
+                sql = sql.replace("*","tag"+ str(i) +",*")
+                sql = sql.replace('%', "'"+tag+"'" +',%')
+                i +=1
+            sql = sql.replace(",*",'')
+            sql = sql.replace(',%', '')
+            print (sql)
+            cursor.execute(sql)
+            conn.commit()
+
             res = jsonify('success')
             res.status_code = 200
             return res
+
 
         if request.method == 'DELETE':
             _uid = request.form['uid']
