@@ -25,27 +25,43 @@ def manageUsers():
             _mobile = request.form['mobile']
             _batch = request.form['batch']
             _department = request.form['department']
-            _type = request.form['type']
-            _address = request.form['address']
-            _linkedinUrl = request.form['linkedinUrl']
+            _isMentor = request.form['isMentor']
+            _designation = request.form['designation']
+            _linkedinUrl = request.form['linkedInURL']
             _contactPref = request.form['contactPref']
             _languages = request.form['languages']
             _resumeLink = request.form['resumeLink']
-            _areasOfInterest = request.form['_areasOfInterest']
+            _areasOfInterest = request.form['areasOfInterest']
             _higherEd = request.form['higherEd']
             _licensesAndCerts = request.form['licensesAndCerts']
             _tags = request.form['tags']
+            _profileURL = request.form['profileURL']
             _summary = request.form['summary']
             _country = request.form['country']
-            _postalCode = request.form['postalCode']
+            
             _isActive = request.form['isActive']
 
             conn = mysql.connect()
             cursor = conn.cursor()
 
             cursor.execute(
-            f"INSERT INTO users(uid, fullName, email, gender, dateOfBirth, mobile, batch, department, type, address, linkedUrl, contactPref, languages, resumeLink, areasOfInterest, higherEd, licensesAndCerts, tags, summary, country, postalCode, isActive ) VALUES('{_uid}','{_fullName}', '{_email}','{_gender}','{_dateOfBirth}','{_mobile}','{_batch}','{_department}','{_type}','{_address}','{_linkedinUrl}','{_contactPref}','{_languages}','{_resumeLink}','{_areasOfInterest}','{_higherEd}','{_licensesAndCerts}','{_tags}','{_summary}','{_country}','{_postalCode}','{_isActive}',)")
+            f"INSERT INTO users(uid, fullName, email, designation, gender, dateOfBirth, batch, department, isMentor, mobile, contactPref, country, linkedInURL, resumeLink, summary, areasOfInterest, languages, higherEd, licensesAndCerts, isActive, profileURL ) VALUES('{_uid}','{_fullName}', '{_email}','{_designation}','{_gender}','{_dateOfBirth}','{_batch}','{_department}','{_isMentor}','{_mobile}','{_contactPref}','{_country}','{_linkedinUrl}','{_resumeLink}','{_summary}','{_areasOfInterest}','{_languages}','{_higherEd}', '{_licensesAndCerts}','{_isActive}','{_profileURL}')")
             conn.commit()
+            tags=_tags.split(',')
+            print(tags)
+            sql = f"INSERT INTO tags (uid, *) VALUES('{_uid}', %)"
+            i = 1
+            for tag in tags:
+
+                sql.replace('*','tag'+str(i) +',*')
+                sql.replace('%', "'"+tag+"'" +',%')
+                i +=1
+            sql.replace(',*','')
+            sql.replace(',%', '')
+            print (sql)
+            cursor.execute(sql)
+            conn.commit()
+
             res = jsonify('success')
             res.status_code = 200
             return res
