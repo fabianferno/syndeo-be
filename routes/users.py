@@ -38,7 +38,6 @@ def manageUsers():
             _profileURL = request.form['profileURL']
             _summary = request.form['summary']
             _country = request.form['country']
-            
             _isActive = request.form['isActive']
 
             conn = mysql.connect()
@@ -48,16 +47,15 @@ def manageUsers():
             f"INSERT INTO users(uid, fullName, email, designation, gender, dateOfBirth, batch, department, isMentor, mobile, contactPref, country, linkedInURL, resumeLink, summary, areasOfInterest, languages, higherEd, licensesAndCerts, isActive, profileURL ) VALUES('{_uid}','{_fullName}', '{_email}','{_designation}','{_gender}','{_dateOfBirth}','{_batch}','{_department}','{_isMentor}','{_mobile}','{_contactPref}','{_country}','{_linkedinUrl}','{_resumeLink}','{_summary}','{_areasOfInterest}','{_languages}','{_higherEd}', '{_licensesAndCerts}','{_isActive}','{_profileURL}')")
             conn.commit()
             tags=_tags.split(',')
-            print(tags)
             sql = f"INSERT INTO tags (uid, *) VALUES('{_uid}', %)"
             i = 1
             for tag in tags:
-
-                sql.replace('*','tag'+str(i) +',*')
-                sql.replace('%', "'"+tag+"'" +',%')
+                print(tag)
+                sql = sql.replace("*","tag"+ str(i) +",*")
+                sql = sql.replace('%', "'"+tag+"'" +',%')
                 i +=1
-            sql.replace(',*','')
-            sql.replace(',%', '')
+            sql = sql.replace(",*",'')
+            sql = sql.replace(',%', '')
             print (sql)
             cursor.execute(sql)
             conn.commit()
