@@ -71,8 +71,8 @@ def allocation(uid):
     try:
         if request.method == 'GET':
 
+            _uid = request.args['uid']
             _allocationId = request.args['allocationId']
-            _uid = request.form['uid']
             conn = mysql.connect()
             cursor = conn.cursor()
             cursor.execute(f"SELECT * FROM `admin` WHERE `admin`.`uid` = '{_uid}'")
