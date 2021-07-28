@@ -65,7 +65,7 @@ def allocations():
 def allocation(uid):
 
     """
-    [GET][admin] - Get allocation record where mentorUid / menteerUid == uid
+    [GET][admin] - Get allocation record where mentorUid / menteeUid == uid
     """
 
     try:
@@ -79,7 +79,7 @@ def allocation(uid):
             admin = cursor.fetchone()
             
             if admin: 
-                cursor.execute(f"SELECT * FROM `allocations` WHERE `allocations` . `mentorId` = '{_uid}' AND `menteeId` = '{_uid}' ")
+                cursor.execute(f"SELECT * FROM `allocations` WHERE `allocations` . `mentorUid` = '{_uid}' AND `menteeUid` = '{_uid}' ")
                 
             else:
                 return forbidden()  # It throws a 403 response saying "failure"
