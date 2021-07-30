@@ -65,21 +65,21 @@ def allocations():
 def allocation(uid):
 
     """
-    [GET][admin] - Get allocation record where mentorUid / menteerUid == uid
+    [GET][admin] - Get allocation record where mentorUid / menteeUid == uid
     """
 
     try:
         if request.method == 'GET':
 
+            _uid = request.args['uid']
             _allocationId = request.args['allocationId']
-            _uid = request.form['uid']
             conn = mysql.connect()
             cursor = conn.cursor()
             cursor.execute(f"SELECT * FROM `admin` WHERE `admin`.`uid` = '{_uid}'")
             admin = cursor.fetchone()
             
             if admin: 
-                cursor.execute(f"SELECT * FROM `allocations` WHERE `allocations` . `mentorId` = '{_uid}' AND `menteeId` = '{_uid}' ")
+                cursor.execute(f"SELECT * FROM `allocations` WHERE `allocations` . `mentorUid` = '{_uid}' AND `menteeUid` = '{_uid}' ")
                 
             else:
                 return forbidden()  # It throws a 403 response saying "failure"
