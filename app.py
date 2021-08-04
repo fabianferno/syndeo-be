@@ -46,6 +46,21 @@ def internal_server_error(error=None):
     traceback.print_exc()
     return res
 
+@app.errorhandler(505)
+def firebase_error(error=None):
+    """
+        505 handler
+    """
+    message = {
+        'status': 505,
+        'message': 'Firebase Error',
+        "reason": error
+    }
+    res = jsonify(message)
+    res.status_code = 505
+    traceback.print_exc()
+    return res
+
 
 @app.after_request
 def after_request_func(response):
