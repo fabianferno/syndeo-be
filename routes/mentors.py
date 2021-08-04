@@ -100,7 +100,7 @@ def isAgreed():
 
 # /mentors/all
 @app.route('/mentors', methods=['GET'])
-def getAllMentors():
+def getMentorsUnderKeyword():
     """
         [GET] - Get a list of all mentors under a keyword
     """
@@ -114,16 +114,22 @@ def getAllMentors():
                 f"SELECT `uid` FROM tags WHERE MATCH(`tag1`,`tag2`,`tag3`,`tag4`,`tag5`,`tag6`,`tag7`,`tag8`,`tag9`,`tag10`,`tag11`,`tag12`,`tag13`,`tag14`,`tag15`,`tag16`) AGAINST ('{_keywords}' IN NATURAL LANGUAGE MODE);")
             mentorList = cursor.fetchall()
 
+
             resultProfiles = []
 
             for mentor in mentorList:
                 try:
-                    profile = cursor.execute(
-                        f"SELECT * FROM `users` WHERE `users`.`uid`='{mentor.uid}'")
+                    cursor.execute(
+                        f"SELECT * FROM `users` WHERE `users`.`uid`='{mentor['uid']}'")
+                    profile = cursor.fetchone()
+                    print(profile)
+                    if(profile != None):
+                        resultProfiles.append(profile)
+
                 except Exception as e:
                     print(e)
                     return internal_server_error()
-                resultProfiles.append(profile)
+            
 
             cursor.close()
             conn.close()
