@@ -124,11 +124,11 @@ def manageUsers():
                     i = 1
                     for tag in tags:
                         print(tag)
-                        sql = sql.replace("*","tag"+ str(i) +",*")
-                        sql = sql.replace('%', "'"+tag+"'" +',%')
+                        sql = sql.replace("*","tag"+ str(i) +", *")
+                        sql = sql.replace('%', "'"+tag+"'" +', %')
                         i +=1
-                    sql = sql.replace(",*",'')
-                    sql = sql.replace(',%', '')
+                    sql = sql.replace(", *",'')
+                    sql = sql.replace(', %', '')
                     print (sql)
                     cursor.execute(sql)
                     conn.commit()
@@ -170,26 +170,73 @@ def manageUsers():
         if request.method == 'PUT':
             _uid = request.form['uid']
             
+            
+            _fullName = request.form['fullName']
+            _email = request.form['email']
+            _gender = request.form['gender']
+            _dateOfBirth = request.form['dateOfBirth']
+            _mobile = request.form['mobile']
+            _batch = request.form['batch']
+            _department = request.form['department']
+            _profilePic = request.form['profilePic']
+            
+            _designation = request.form['designation']
+            _linkedinUrl = request.form['linkedInURL']
+            _contactPref = request.form['contactPref']
+            _languages = request.form['languages']
+            _resumeLink = request.form['resumeLink']
+            _areasOfInterest = request.form['areasOfInterest']
+            _higherEd = request.form['higherEd']
+            _licensesAndCerts = request.form['licensesAndCerts']
+            _tags = request.form['tags']
+            
+            _summary = request.form['summary']
+            _country = request.form['country']
+            
 
             conn = mysql.connect()
             cursor = conn.cursor()
-            
-            cursor.execute(f"SELECT * FROM `users` WHERE `users`.`uid` = '{_uid}'")
-            
+
+            cursor.execute(
+            f"UPDATE users SET fullName='{_fullName}',designation='{_designation}',gender='{_gender}',dateOfBirth='{_dateOfBirth}',batch='{_batch}',department='{_department}',mobile='{_mobile}',contactPref='{_contactPref}',country='{_country}',linkedInURL='{_linkedinUrl}',resumeLink='{_resumeLink}',summary='{_summary}',areasOfInterest='{_areasOfInterest}',languages='{_languages}',higherEd='{_higherEd}',licensesAndCerts='{_licensesAndCerts}',profilePic='{_profilePic}' WHERE uid= '{_uid}'")
             conn.commit()
             
+            sql = f"DELETE from `tags` WHERE uid = '{_uid}'"
+            
+            
+            cursor.execute(sql)
+            conn.commit()
+            tags=_tags.split(',')
+            sql = f"INSERT INTO tags (uid, *) VALUES('{_uid}', %)"
+            i = 1
+            for tag in tags:
+                    print(tag)
+                    sql = sql.replace("*","tag"+ str(i) +", *")
+                    sql = sql.replace('%', "'"+tag+"'" +', %')
+                    i +=1
+            sql = sql.replace(", *",'')
+            sql = sql.replace(', %', '')
+            print (sql)
+            cursor.execute(sql)
+            conn.commit()
+
             res = jsonify('success')
             res.status_code = 200
             return res
 
+
         if request.method == 'DELETE':
             _uid = request.form['uid']
+
+            
             
 
             conn = mysql.connect()
             cursor = conn.cursor()
             
-            cursor.execute(f"SELECT * FROM `users` WHERE `users`.`uid` = '{_uid}'")
+            cursor.execute(f"DELETE FROM `tags` WHERE `tags`.`uid` = '{_uid}'")
+            
+            cursor.execute(f"DELETE FROM `users` WHERE `users`.`uid` = '{_uid}'")
             
             conn.commit()
 
