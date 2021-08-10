@@ -2,3 +2,5 @@ __pycache__
 routes/__pycache__
 env
 lenv
+venv
+.idea
