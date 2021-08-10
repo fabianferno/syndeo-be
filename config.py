@@ -23,3 +23,5 @@ credentials = credentials.Certificate('firebase.json')
 firebase_admin.initialize_app(credentials)
 
 defaultProfilePic = "https://i.ibb.co/6HJGFPY/Screenshot-2021-08-04-134113.png"
+
+domainName = "licet.ac.in"
