@@ -191,7 +191,6 @@ def manageUsers():
                 _mobile = request.form['mobile']
                 _batch = request.form['batch']
                 _department = request.form['department']
-                _profilePic = request.form['profilePic']
 
                 _designation = request.form['designation']
                 _linkedinUrl = request.form['linkedInURL']
@@ -205,13 +204,21 @@ def manageUsers():
                 
                 _summary = request.form['summary']
                 _country = request.form['country']
+                _profilePicFile = None
                 
 
                 conn = mysql.connect()
                 cursor = conn.cursor()
 
+                if 'profilePic' in request.files:
+                    # Profile Pic File
+                    _profilePicFile = request.files['profilePic'].read()
+                    
+                    # We must encode the file to get base64 string
+                    _profilePicFile = base64.b64encode(_profilePicFile)
+
                 cursor.execute(
-                f"UPDATE users SET fullName='{_fullName}',designation='{_designation}',gender='{_gender}',dateOfBirth='{_dateOfBirth}',batch='{_batch}',department='{_department}',mobile='{_mobile}',contactPref='{_contactPref}',country='{_country}',linkedInURL='{_linkedinUrl}',resumeLink='{_resumeLink}',summary='{_summary}',areasOfInterest='{_areasOfInterest}',languages='{_languages}',higherEd='{_higherEd}',licensesAndCerts='{_licensesAndCerts}',profilePic='{_profilePic}' WHERE uid= '{_uid}'")
+                f"UPDATE users SET fullName='{_fullName}',designation='{_designation}',gender='{_gender}',dateOfBirth='{_dateOfBirth}',batch='{_batch}',department='{_department}',mobile='{_mobile}',contactPref='{_contactPref}',country='{_country}',linkedInURL='{_linkedinUrl}',resumeLink='{_resumeLink}',summary='{_summary}',areasOfInterest='{_areasOfInterest}',languages='{_languages}',higherEd='{_higherEd}',licensesAndCerts='{_licensesAndCerts}',profilePic='{_profilePicFile}' WHERE uid= '{_uid}'")
                 conn.commit()
                 
                 sql = f"DELETE from `tags` WHERE uid = '{_uid}'"
@@ -277,15 +284,15 @@ def authStatus():
        
     """
     if request.method == 'POST':            
-        _uid = request.args['uid']
-        _idToken = request.args['idToken']
+        _uid = request.form['uid']
+        _idToken = request.form['idToken']
         
         try:
             var = authenticate(_uid, _idToken)
 
             if var == "Mentor" or var == "Student": 
 
-                sql_query = f"SELECT profilePic FROM `users` WHERE uid = '{_uid}'"
+                sql_query = f"SELECT profilePic, isActive FROM `users` WHERE uid = '{_uid}'"
                 cnx = mysql.connect()
                 cursor = cnx.cursor()
                 cursor.execute(sql_query)
@@ -295,7 +302,7 @@ def authStatus():
                     image = b64encode(row['profilePic']).decode("utf-8")
                     row['profilePic'] = image
 
-                result = { "authStatus": "true", "userType": var, "profilePic": row['profilePic'] }
+                result = { "authStatus": "true", "userType": var, "profilePic": row['profilePic'], "isActive": row['isActive'] }
                 res = jsonify(result)
                 res.status_code = 200
                 return res
