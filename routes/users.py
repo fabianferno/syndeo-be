@@ -228,9 +228,6 @@ def manageUsers():
         if request.method == 'DELETE':
             _uid = request.form['uid']
 
-            
-            
-
             conn = mysql.connect()
             cursor = conn.cursor()
             
@@ -239,6 +236,9 @@ def manageUsers():
             cursor.execute(f"DELETE FROM `users` WHERE `users`.`uid` = '{_uid}'")
             
             conn.commit()
+            
+            auth.delete_user(_uid)
+            print('Successfully deleted user')
 
             res = jsonify('success')
             res.status_code = 200
