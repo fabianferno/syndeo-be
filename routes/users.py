@@ -5,6 +5,7 @@ from config import mysql, defaultProfilePic, domainName
 from flask import jsonify, request
 from firebase_admin import auth
 import base64
+from base64 import b64encode
 from PIL import Image
 import io 
 
@@ -85,12 +86,14 @@ def manageUsers():
             _summary = request.form['summary']
             _country = request.form['country']
             _isActive = request.form['isActive']
+            _profilePicFile = None
 
-            # Profile Pic File
-            _profilePicFile = request.files['profilePic'].read()
-            
-            # We must encode the file to get base64 string
-            _profilePicFile = base64.b64encode(_profilePicFile)
+            if 'profilePic' in request.files:
+                # Profile Pic File
+                _profilePicFile = request.files['profilePic'].read()
+                
+                # We must encode the file to get base64 string
+                _profilePicFile = base64.b64encode(_profilePicFile)
 
             # Check if the student is from licet
             if(_isMentor == '0'):
@@ -144,7 +147,6 @@ def manageUsers():
 
 
             except Exception as e:
-                auth.delete_user(account.uid)
                 return firebase_error()
 
         if request.method == 'GET':
@@ -160,9 +162,12 @@ def manageUsers():
 
             cursor.close()
             conn.close()
+            
+            if profile['profilePic'] != None:
+                image = b64encode(profile['profilePic']).decode("utf-8")
+                profile['profilePic'] = image
 
             res = jsonify(profile)
-            print(profile)
             res.status_code = 200
             return res
 
