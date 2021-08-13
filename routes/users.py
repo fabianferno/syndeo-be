@@ -270,3 +270,91 @@ def manageUsers():
     except Exception as e:
         print(e)
         return internal_server_error()
+
+@app.route('/users/auth-status', methods=['POST'])
+def authStatus():
+    """
+       
+    """
+    if request.method == 'POST':            
+        _uid = request.args['uid']
+        _idToken = request.args['idToken']
+        
+        try:
+            var = authenticate(_uid, _idToken)
+
+            if var == "Mentor" or var == "Student": 
+
+                sql_query = f"SELECT profilePic FROM `users` WHERE uid = '{_uid}'"
+                cnx = mysql.connect()
+                cursor = cnx.cursor()
+                cursor.execute(sql_query)
+                row = cursor.fetchone()
+
+                if row['profilePic'] != None:
+                    image = b64encode(row['profilePic']).decode("utf-8")
+                    row['profilePic'] = image
+
+                result = { "authStatus": "true", "userType": var, "profilePic": row['profilePic'] }
+                res = jsonify(result)
+                res.status_code = 200
+                return res
+
+            elif var == "admin": 
+
+                result = { "authStatus": "true", "userType": "admin" }
+                res = jsonify(result)
+                res.status_code = 200
+                return res
+
+            else:
+                res = jsonify({ "authStatus": "false"})
+                res.status_code = 200
+                return res
+
+        except Exception as e:
+            print(e)
+            return internal_server_error()
+
+
+# Authentication method for reuse: returns "true", "false", or "invalid-data" || String values, not Boolean
+def authenticate(_uid, _id_token):
+    try:
+        decoded_token = auth.verify_id_token(_id_token)
+        uid = decoded_token['uid']
+    except Exception as e:
+        print(e)
+        print("auth:invalid-data")
+        return "invalid-data"
+
+    try:
+        # Check if ADMIN
+        sql_query = f"SELECT * FROM `admin` WHERE uid = '{_uid}'"
+        cnx = mysql.connect()
+        cursor = cnx.cursor()
+        cursor.execute(sql_query)
+        row = cursor.fetchone()
+        if row:
+            uid = row['uid']
+            if _uid == uid:
+                return "admin"
+        else:
+            # Check if USER
+            sql_query = f"SELECT * FROM `users` WHERE uid = '{_uid}'"
+            cnx = mysql.connect()
+            cursor = cnx.cursor()
+            cursor.execute(sql_query)
+            row = cursor.fetchone()
+            if row:
+                userType = row['isMentor']
+                if userType == 1: 
+                    return "Mentor"
+                else:
+                    return "Student"
+            else:
+                print("auth:fail")
+                return "false"
+
+    except Exception as e:
+        print(e)
+        return "false"
