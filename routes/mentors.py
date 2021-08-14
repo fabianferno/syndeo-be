@@ -90,9 +90,6 @@ def isAgreed():
             res.status_code = 200
             return res
 
-        else:
-            return forbidden()  # It throws a 403 response saying "failure"
-
     except Exception as e:
         print(e)
         return internal_server_error()
@@ -120,7 +117,7 @@ def getMentorsUnderKeyword():
             for mentor in mentorList:
                 try:
                     cursor.execute(
-                        f"SELECT * FROM `users` WHERE `users`.`uid`='{mentor['uid']}'")
+                        f"SELECT uid, fullName, designation, country FROM `users` WHERE `users`.`uid`='{mentor['uid']}' AND `users`.`isMentor` = 1 AND  `users`.`isActive` = 1")
                     profile = cursor.fetchone()
                     print(profile)
                     if(profile != None):
