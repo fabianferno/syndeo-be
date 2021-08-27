@@ -109,9 +109,17 @@ def getMentorsUnderKeyword():
             cursor = conn.cursor()
             cursor.execute(
                 f"SELECT `uid` FROM tags WHERE MATCH(`tag1`,`tag2`,`tag3`,`tag4`,`tag5`,`tag6`,`tag7`,`tag8`,`tag9`,`tag10`,`tag11`,`tag12`,`tag13`,`tag14`,`tag15`,`tag16`) AGAINST ('{_keywords}' IN NATURAL LANGUAGE MODE);")
-            mentorList = cursor.fetchall()
+            mentorKeywordMatchList = list(cursor.fetchall())
 
+            # Also check for mentors matching name under given keywords
+            cursor.execute(
+                f"SELECT `uid` FROM users WHERE MATCH(`fullName`) AGAINST ('{_keywords}' IN NATURAL LANGUAGE MODE);")
+            mentorNameMatchList = list(cursor.fetchall())
 
+            # Combine the tuples
+            mentorList = mentorKeywordMatchList + mentorNameMatchList
+
+            # Init Result List
             resultProfiles = []
 
             for mentor in mentorList:
@@ -126,7 +134,6 @@ def getMentorsUnderKeyword():
                 except Exception as e:
                     print(e)
                     return internal_server_error()
-            
 
             cursor.close()
             conn.close()
