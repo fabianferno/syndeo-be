@@ -4,3 +4,4 @@ env
 lenv
 venv
 .idea
+.vscode
