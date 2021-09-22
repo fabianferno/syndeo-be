@@ -61,25 +61,28 @@ def allocations():
             res.status_code = 200
             return res
 
-        # [GET][admin] - Get a List of allocations
+            # [GET][admin/mentor] - Get allocation record where mentorUid / menteeUid == uid
 
-        if request.method == 'GET':
-            _allocationId = request.args['allocationId']
+        elif request.method == 'GET':
+            _uid = request.args['uid']
             conn = mysql.connect()
             cursor = conn.cursor()
             cursor.execute(
-                f"SELECT * FROM `admin` WHERE `admin`.`uid` = '{_uid}'")
-            admin = cursor.fetchone()
-            if admin:
-                cursor.execute(
-                    f"SELECT * FROM `allocations` WHERE `allocations`.`allocationId` = '{_allocationId}'")
-            else:
-                return forbidden()  # It throws a 403 response saying "failure"
+                f"SELECT * FROM `users` WHERE `users`.`uid`='{_uid}' AND `users`.`isMentor` = '1'")
+            mentor = cursor.fetchone()
 
-            allocationList = cursor.fetchone()
+            if mentor:
+                cursor.execute(
+                    f"SELECT * FROM `allocations` WHERE `allocations`.`mentorUid` = '{_uid}' OR `allocations`.`menteeUid` = '{_uid}' ")
+
+            else:
+                # It throws a 403 response saying "failure"
+                return {"status": "not a mentor"}
+
+            allocationRecords = cursor.fetchall()
             cursor.close()
             conn.close()
-            res = jsonify(allocationList)
+            res = jsonify(allocationRecords)
             res.status_code = 200
             return res
         else:
@@ -89,32 +92,28 @@ def allocations():
         print(e)
         return internal_server_error()
 
-    # /allocations?<uid>
 
-
-@app.route('/allocations?<uid>', methods=['GET'])
-def allocation(uid):
+@app.route('/allocations/all', methods=['POST', 'GET'])
+def allocations():
     """
-    [GET][admin] - Get allocation record where mentorUid / menteeUid == uid
+        [GET] - Get complete allocations
     """
-
     try:
         if request.method == 'GET':
-
             _uid = request.args['uid']
-            _allocationId = request.args['allocationId']
             conn = mysql.connect()
             cursor = conn.cursor()
             cursor.execute(
-                f"SELECT * FROM `admin` WHERE `admin`.`uid` = '{_uid}'")
+                f"SELECT * FROM `users` WHERE `users`.`uid`='{_uid}' AND `users`.`isAdmin` = '1'")
             admin = cursor.fetchone()
 
             if admin:
                 cursor.execute(
-                    f"SELECT * FROM `allocations` WHERE `allocations` . `mentorUid` = '{_uid}' AND `allocations`.`menteeUid` = '{_uid}' ")
+                    f"SELECT * FROM `allocations` WHERE `isAgreed`='1'")
 
             else:
-                return forbidden()  # It throws a 403 response saying "failure"
+                # It throws a 403 response saying "failure"
+                return {"status": "not an admin"}
 
             allocationRecord = cursor.fetchone()
             cursor.close()
@@ -122,7 +121,6 @@ def allocation(uid):
             res = jsonify(allocationRecord)
             res.status_code = 200
             return res
-
         else:
             return forbidden()  # It throws a 403 response saying "failure"
 
