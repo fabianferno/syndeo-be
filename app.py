@@ -1,7 +1,11 @@
 from flask import Flask, jsonify, request
 import traceback
 
+from dotenv import load_dotenv
+
+
 app = Flask(__name__, static_url_path='', static_folder='.')
+load_dotenv()
 
 
 @app.errorhandler(404)
@@ -46,6 +50,7 @@ def internal_server_error(error=None):
     traceback.print_exc()
     return res
 
+
 @app.errorhandler(505)
 def firebase_error(error=None):
     """
@@ -78,6 +83,8 @@ from routes import users
 from routes import mentors
 from routes import mentees
 from routes import admin
+from routes import allocations
+
 
 @app.route('/')
 def homeRoute():

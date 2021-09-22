@@ -1,10 +1,18 @@
+# For SMTP
+from __future__ import print_function
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
+from pprint import pprint
+from config import mail_config
+
 import pymysql
 import random
 from app import app, forbidden, internal_server_error
-from config import mysql
+from config import mysql, syndeoClientURL
 from flask import jsonify, request
 import string
 import datetime
+import traceback
 
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
@@ -17,28 +25,43 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 @app.route('/allocations', methods=['POST', 'GET'])
 def allocations():
     """
-    [POST] - Insert allocation records
+        [POST] - Insert allocation records
     """
     try:
         if request.method == 'POST':
+            traceback.print_exc()
             _uid = request.form['uid']
-            _allocationId = id_generator()
             _mentorUid = request.form['mentorUid']
             _menteeUid = request.form['menteeUid']
-            _dateAllocated = datetime.now()
-            _isValidated = request.form['isValidated']
-            _isAgreed = request.form['isAgreed']
-            _validator = request.form['validator']
+            _menteeName = request.form['menteeName']
+            _mentorName = request.form['mentorName']
+            _mentorMail = request.form['mentorMail']
+            _menteeSummary = request.form['menteeSummary']
+
+            # Later
+            _isValidated = 0
+            _isAgreed = 0
+
             conn = mysql.connect()
             cursor = conn.cursor()
+
             cursor.execute(
-                f"INSERT INTO allocations(uid, allocationId, mentorUid, menteeUid, dateAllocated, isValidated, isAgreed, validator) VALUES('{_uid}','{_allocationId}', '{_mentorUid}', '{_menteeUid}', '{_dateAllocated}', '{_isValidated}', '{_isAgreed}', '{_validator}',)")
+                f"INSERT INTO allocations(allocationId, mentorUid, menteeUid, dateAllocated, isValidated, isAgreed, validator) VALUES('{id_generator()}', '{_mentorUid}', '{_menteeUid}', NOW(), '{_isValidated}', '{_isAgreed}', NULL)")
+
+            try:
+                sendMenteeMail(_mentorName, _mentorMail,
+                               _menteeSummary, _menteeName, syndeoClientURL + "/profile.php?uid=" + _menteeUid)
+
+            except Exception as e:
+                print(e)
+                return internal_server_error()
+
             conn.commit()
             res = jsonify('success')
             res.status_code = 200
             return res
 
-#     [GET][admin] - Get a List of allocations
+        # [GET][admin] - Get a List of allocations
 
         if request.method == 'GET':
             _allocationId = request.args['allocationId']
@@ -106,3 +129,42 @@ def allocation(uid):
     except Exception as e:
         print(e)
         return internal_server_error()
+
+
+def sendMenteeMail(mentorName, mentorMail,
+                   menteeSummary, menteeName, menteeProfileUrl):
+    print("Sending Mentee Mail")
+    print(mentorName)
+    print(mentorMail)
+    print(menteeSummary)
+    print(menteeName)
+    print(menteeProfileUrl)
+
+    # create an instance of the API class
+    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
+        sib_api_v3_sdk.ApiClient(mail_config))
+    send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+        to=[{
+            "email": mentorMail,
+            "name": mentorName}],
+        template_id=3,
+        params={
+            "mentee_summary": menteeSummary,
+            "mentee": menteeName,
+            "mentor": mentorName,
+            "mentee_profile_url": menteeProfileUrl,
+        },
+        headers={
+            "X-Mailin-custom": "custom_header_1:custom_value_1|custom_header_2:custom_value_2|custom_header_3:custom_value_3",
+            "charset": "iso-8859-1"
+        }
+    )  # SendSmtpEmail | Values to send a transactional email
+
+    try:
+        # Send a transactional email
+        api_response = api_instance.send_transac_email(send_smtp_email)
+        pprint(api_response)
+
+    except ApiException as e:
+        raise("Send In Blue Error",
+              f"Exception when calling SMTPApi->send_transac_email: {e}\n")
