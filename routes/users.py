@@ -168,8 +168,8 @@ def manageUsers():
                 connectionDetails = {"allocation" : {}}
                 connectionDetails["allocation"]["isAllocated"] = False
                 cursor.execute(f"SELECT * FROM `allocations` WHERE (`mentorUid` = '{_uid}' AND `menteeUid` = '{_profileUid}') OR (`menteeUid` = '{_uid}' AND `mentorUid` = '{_profileUid}')")
-                allocation = cursor.fetchone() 
-                if profile: 
+                allocation = cursor.fetchone()  
+                if allocation != None: 
                     connectionDetails["allocation"]["isAllocated"] = True
                     connectionDetails["allocation"]["allocationId"] = allocation["allocationId"]
                     connectionDetails["allocation"]["status"] = "Validated" if allocation["isValidated"] else ("mentorAgreed" if allocation["isAgreed"] else "pendingRequest") 
