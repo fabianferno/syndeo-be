@@ -94,7 +94,7 @@ def allocations():
 
 
 @app.route('/allocations/all', methods=['POST', 'GET'])
-def allocations():
+def get_allocations():
     """
         [GET] - Get complete allocations
     """
