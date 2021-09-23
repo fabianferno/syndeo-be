@@ -1,3 +1,4 @@
+from routes.allocations import allocations
 from flask.helpers import send_file
 import pymysql
 from app import app, firebase_error, forbidden, internal_server_error
@@ -151,21 +152,32 @@ def manageUsers():
 
         if request.method == 'GET':
             _uid = request.args['uid']
+            _profileUid = request.args['profileUid']
 
             conn = mysql.connect()
             cursor = conn.cursor()
 
-            cursor.execute(
-                f"SELECT * FROM `users` WHERE `users`.`uid` = '{_uid}'")
-
+            cursor.execute(f"SELECT * FROM `users` WHERE `users`.`uid` = '{_profileUid}'")
             profile = cursor.fetchone()
+
+            if profile['profilePic'] != None:
+                image = b64encode(profile['profilePic']).decode("utf-8")
+                profile['profilePic'] = image 
+
+            if _uid != _profileUid:
+                connectionDetails = {"allocation" : {}}
+                connectionDetails["allocation"]["isAllocated"] = False
+                cursor.execute(f"SELECT * FROM `allocations` WHERE (`mentorUid` = '{_uid}' AND `menteeUid` = '{_profileUid}') OR (`menteeUid` = '{_uid}' AND `mentorUid` = '{_profileUid}')")
+                allocation = cursor.fetchone() 
+                if profile: 
+                    connectionDetails["allocation"]["isAllocated"] = True
+                    connectionDetails["allocation"]["allocationId"] = allocation["allocationId"]
+                    connectionDetails["allocation"]["status"] = "Validated" if allocation["isValidated"] else ("mentorAgreed" if allocation["isAgreed"] else "pendingRequest") 
+                profile.update(connectionDetails) 
+
 
             cursor.close()
             conn.close()
-            
-            if profile['profilePic'] != None:
-                image = b64encode(profile['profilePic']).decode("utf-8")
-                profile['profilePic'] = image
 
             res = jsonify(profile)
             res.status_code = 200
