@@ -69,20 +69,21 @@ def getAllMentors():
 # /mentors/agree
 
 
-@app.route('/mentors/agree', methods=['PUT'])
+@app.route('/mentors/agree', methods=['PUT', 'POST'])
 def isAgreed():
     """
-        [PUT] - Sets an allocation as agreed
+        [POST] - Sets an allocation as agreed
     """
     try:
-        if request.method == 'PUT':
-            _mentorUid = request.form['mentorUid']
+        if request.method == 'POST':
+            _allocationId = request.form['allocationId']
+            print("allocatonId: " + _allocationId)
 
             conn = mysql.connect()
             cursor = conn.cursor()
 
             cursor.execute(
-                f"UPDATE `allocations` SET `allocations`.`isAgreed`=1 WHERE `allocations`.`mentorUid`='{_mentorUid}'")
+                f"UPDATE `allocations` SET `allocations`.`isAgreed`=1 WHERE `allocations`.`allocationId`='{_allocationId}'")
 
             conn.commit()
 
