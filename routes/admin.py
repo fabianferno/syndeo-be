@@ -14,16 +14,17 @@ def adminValidate():
         if request.method == 'PUT':
             _uid = request.form['uid']
             _allocationId = request.form['allocationId']
+            _validator = request.form['validator']
 
             conn = mysql.connect()
             cursor = conn.cursor()
             
-            cursor.execute(f"SELECT * FROM `admin` WHERE `admin`.`uid` = '{_uid}'")
+            cursor.execute(f"SELECT * FROM `users` WHERE `users`.`uid` = '{_uid}' AND isAdmin = 1")
 
             admin = cursor.fetchone()
 
             if admin: 
-                cursor.execute(f"UPDATE allocations SET allocations.isValidated=1 WHERE allocations.allocationId='{_allocationId}'")
+                cursor.execute(f"UPDATE allocations SET allocations.isValidated=1, allocations.validator = '{_validator}' WHERE allocations.allocationId='{_allocationId}'")
 
             else:
                 return forbidden()  # It throws a 403 response saying "failure"

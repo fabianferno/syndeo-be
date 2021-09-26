@@ -113,12 +113,23 @@ def get_allocations():
 
             else:
                 # It throws a 403 response saying "failure"
-                return {"status": "not an admin"}
+                return {"status": "not-admin"}
 
-            allocationRecord = cursor.fetchone()
+            allocationRecords = cursor.fetchall() 
+
+            for record in allocationRecords: 
+                fullNames = {"mentorName" : "", "menteeName" : ""} 
+                cursor.execute(f"SELECT fullName FROM `users` WHERE `uid`='{record['mentorUid']}'")
+                fullNames["mentorName"] = cursor.fetchone()["fullName"]
+
+                cursor.execute(f"SELECT fullName FROM `users` WHERE `uid`='{record['menteeUid']}'")
+                fullNames["menteeName"] = cursor.fetchone()["fullName"]
+
+                record.update(fullNames)
+
             cursor.close()
             conn.close()
-            res = jsonify(allocationRecord)
+            res = jsonify({"status": "admin", "data" : allocationRecords})
             res.status_code = 200
             return res
         else:

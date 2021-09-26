@@ -348,7 +348,7 @@ def authenticate(_uid, _id_token):
 
     try:
         # Check if ADMIN
-        sql_query = f"SELECT * FROM `admin` WHERE uid = '{_uid}'"
+        sql_query = f"SELECT * FROM `users` WHERE uid = '{_uid}' and isAdmin = 1"
         cnx = mysql.connect()
         cursor = cnx.cursor()
         cursor.execute(sql_query)
