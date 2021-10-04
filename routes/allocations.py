@@ -42,26 +42,33 @@ def allocations():
             _isValidated = 0
             _isAgreed = 0
 
+
             conn = mysql.connect()
             cursor = conn.cursor()
 
-            cursor.execute(
-                f"INSERT INTO allocations(allocationId, mentorUid, menteeUid, dateAllocated, isValidated, isAgreed, validator) VALUES('{id_generator()}', '{_mentorUid}', '{_menteeUid}', NOW(), '{_isValidated}', '{_isAgreed}', NULL)")
+            cursor.execute(f"SELECT * FROM `allocations` WHERE `menteeUid` = '{_menteeUid}'")
+            mentee = cursor.fetchone()
 
-            try:
-                sendMenteeMail(_mentorName, _mentorMail,
-                               _menteeSummary, _menteeName, syndeoClientURL + "/profile.php?uid=" + _menteeUid)
 
-            except Exception as e:
-                print(e)
-                return internal_server_error()
+            # Check if mentee is already allocated to a mentor
+            if mentee['profilePic'] == None:
+                cursor.execute(
+                    f"INSERT INTO allocations(allocationId, mentorUid, menteeUid, dateAllocated, isValidated, isAgreed, validator) VALUES('{id_generator()}', '{_mentorUid}', '{_menteeUid}', NOW(), '{_isValidated}', '{_isAgreed}', NULL)")
 
-            conn.commit()
-            res = jsonify('success')
-            res.status_code = 200
-            return res
+                try:
+                    sendMenteeMail(_mentorName, _mentorMail,
+                                _menteeSummary, _menteeName, syndeoClientURL + "/profile.php?uid=" + _menteeUid)
 
-            # [GET][admin/mentor] - Get allocation record where mentorUid / menteeUid == uid
+                except Exception as e:
+                    print(e)
+                    return internal_server_error()
+
+                conn.commit()
+                res = jsonify('success')
+                res.status_code = 200
+                return res
+
+                # [GET][admin/mentor] - Get allocation record where mentorUid / menteeUid == uid
 
         elif request.method == 'GET':
             _uid = request.args['uid']
@@ -101,8 +108,15 @@ def get_allocations():
     try:
         if request.method == 'GET':
             _uid = request.args['uid']
-            _isAgreed = request.args['isAgreed'] # 0 or 1
-            _isValidated = request.args['isValidated'] # 0 or 1
+            
+            _all = request.args['all'] # True or False
+            
+
+
+            
+
+
+
             conn = mysql.connect()
             cursor = conn.cursor()
             cursor.execute(
@@ -110,14 +124,20 @@ def get_allocations():
             admin = cursor.fetchone()
 
             if admin:
-                cursor.execute(
-                    f"SELECT * FROM `allocations` WHERE `isAgreed`='{_isAgreed}' AND `isValidated`='{_isValidated}'")
+                if _all == "True" or _all == "true":
+                    cursor.execute(
+                        f"SELECT * FROM `allocations`")
+                else:
+                    _isAgreed = request.args['isAgreed'] # 0 or 1
+                    _isValidated = request.args['isValidated'] # 0 or 1
+                    cursor.execute(
+                        f"SELECT * FROM `allocations` WHERE `isAgreed`='{_isAgreed}' AND `isValidated`='{_isValidated}'")
 
             else:
                 # It throws a 403 response saying "failure"
                 return {"status": "not-admin"}
 
-            allocationRecords = cursor.fetchall() 
+            allocationRecords = cursor.fetchall()
 
             for record in allocationRecords: 
                 fullNames = {"mentorName" : "", "menteeName" : ""} 

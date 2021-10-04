@@ -146,9 +146,16 @@ def manageUsers():
                     print(e)
                     return internal_server_error(error = e)
 
-
             except Exception as e:
-                return firebase_error()
+                print("firebase-error")
+                print(e)
+                json_dict = {
+                    "status": "fail",
+                    "reason": str(e)
+                }
+                res = jsonify(json_dict)
+                res.status_code = 301
+                return res
 
         if request.method == 'GET':
             _uid = request.args['uid']
