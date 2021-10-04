@@ -46,11 +46,11 @@ def allocations():
             cursor = conn.cursor()
 
             cursor.execute(
-                f"INSERT INTO allocations(allocationId, mentorUid, menteeUid, dateAllocated, isValidated, isAgreed, validator) VALUES('{id_generator()}', '{_mentorUid}', '{_menteeUid}', NOW(), '{_isValidated}', '{_isAgreed}', 'Admin')")
+                f"INSERT INTO allocations(allocationId, mentorUid, menteeUid, dateAllocated, isValidated, isAgreed, validator) VALUES('{id_generator()}', '{_mentorUid}', '{_menteeUid}', NOW(), '{_isValidated}', '{_isAgreed}', NULL)")
 
             try:
                 sendMenteeMail(_mentorName, _mentorMail,
-                                _menteeSummary, _menteeName, syndeoClientURL + "/profile.php?uid=" + _menteeUid)
+                               _menteeSummary, _menteeName, syndeoClientURL + "/profile.php?uid=" + _menteeUid)
 
             except Exception as e:
                 print(e)
@@ -101,6 +101,8 @@ def get_allocations():
     try:
         if request.method == 'GET':
             _uid = request.args['uid']
+            _isAgreed = request.args['isAgreed'] # 0 or 1
+            _isValidated = request.args['isValidated'] # 0 or 1
             conn = mysql.connect()
             cursor = conn.cursor()
             cursor.execute(
@@ -109,7 +111,7 @@ def get_allocations():
 
             if admin:
                 cursor.execute(
-                    f"SELECT * FROM `allocations` WHERE `isAgreed`='1'")
+                    f"SELECT * FROM `allocations` WHERE `isAgreed`='{_isAgreed}' AND `isValidated`='{_isValidated}'")
 
             else:
                 # It throws a 403 response saying "failure"
@@ -141,7 +143,7 @@ def get_allocations():
 
 
 def sendMenteeMail(mentorName, mentorMail,
-                    menteeSummary, menteeName, menteeProfileUrl):
+                   menteeSummary, menteeName, menteeProfileUrl):
     print("Sending Mentee Mail")
     print(mentorName)
     print(mentorMail)
@@ -176,4 +178,4 @@ def sendMenteeMail(mentorName, mentorMail,
 
     except ApiException as e:
         raise("Send In Blue Error",
-            f"Exception when calling SMTPApi->send_transac_email: {e}\n")
+              f"Exception when calling SMTPApi->send_transac_email: {e}\n")
