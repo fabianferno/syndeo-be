@@ -46,11 +46,11 @@ def allocations():
             cursor = conn.cursor()
 
             cursor.execute(
-                f"INSERT INTO allocations(allocationId, mentorUid, menteeUid, dateAllocated, isValidated, isAgreed, validator) VALUES('{id_generator()}', '{_mentorUid}', '{_menteeUid}', NOW(), '{_isValidated}', '{_isAgreed}', NULL)")
+                f"INSERT INTO allocations(allocationId, mentorUid, menteeUid, dateAllocated, isValidated, isAgreed, validator) VALUES('{id_generator()}', '{_mentorUid}', '{_menteeUid}', NOW(), '{_isValidated}', '{_isAgreed}', 'Admin')")
 
             try:
                 sendMenteeMail(_mentorName, _mentorMail,
-                               _menteeSummary, _menteeName, syndeoClientURL + "/profile.php?uid=" + _menteeUid)
+                                _menteeSummary, _menteeName, syndeoClientURL + "/profile.php?uid=" + _menteeUid)
 
             except Exception as e:
                 print(e)
@@ -141,7 +141,7 @@ def get_allocations():
 
 
 def sendMenteeMail(mentorName, mentorMail,
-                   menteeSummary, menteeName, menteeProfileUrl):
+                    menteeSummary, menteeName, menteeProfileUrl):
     print("Sending Mentee Mail")
     print(mentorName)
     print(mentorMail)
@@ -176,4 +176,4 @@ def sendMenteeMail(mentorName, mentorMail,
 
     except ApiException as e:
         raise("Send In Blue Error",
-              f"Exception when calling SMTPApi->send_transac_email: {e}\n")
+            f"Exception when calling SMTPApi->send_transac_email: {e}\n")
