@@ -108,7 +108,7 @@ def manageUsers():
             try:
                 account = auth.create_user(
                         email=_email,
-                        email_verified=False,
+                        email_verified=True,
                         phone_number=_mobile,
                         password=_password,
                         display_name=_fullName,
